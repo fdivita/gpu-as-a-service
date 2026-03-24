@@ -31,5 +31,5 @@ spec:
     - name: gpu-flavor
       resources:
       - name: nvidia.com/gpu
-        nominalQuota: "3"
+        nominalQuota: "4"
         borrowingLimit: "4"
