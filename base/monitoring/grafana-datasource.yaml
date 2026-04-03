@@ -1,0 +1,26 @@
+apiVersion: grafana.integreatly.org/v1beta1
+kind: GrafanaDatasource
+metadata:
+  name: prometheus-thanos
+  namespace: kueue-monitoring
+spec:
+  datasource:
+    name: Prometheus (OpenShift)
+    type: prometheus
+    access: proxy
+    isDefault: true
+    url: "https://thanos-querier.openshift-monitoring.svc.cluster.local:9091"
+    jsonData:
+      httpHeaderName1: "Authorization"
+      timeInterval: "5s"
+      tlsSkipVerify: true
+    secureJsonData:
+      # The token is read from the SA token secret.
+      # Replace this value after deployment:
+      #   TOKEN=$(oc get secret grafana-sa-token -n kueue-monitoring -o jsonpath='{.data.token}' | base64 -d)
+      #   oc patch grafanadatasource prometheus-thanos -n kueue-monitoring \
+      #     --type merge -p "{\"spec\":{\"datasource\":{\"secureJsonData\":{\"httpHeaderValue1\":\"Bearer ${TOKEN}\"}}}}"
+      httpHeaderValue1: "Bearer REPLACE_WITH_SA_TOKEN"
+  instanceSelector:
+    matchLabels:
+      dashboards: kueue-grafana
