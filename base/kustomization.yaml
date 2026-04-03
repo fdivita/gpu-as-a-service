@@ -12,5 +12,6 @@ resources:
  - kueue/hardware-profiles
  - kueue/queue
  - kueue/priorityclass
+ - monitoring
 
 
