@@ -1,0 +1,102 @@
+apiVersion: monitoring.coreos.com/v1
+kind: PrometheusRule
+metadata:
+  name: kueue-alerts
+  namespace: redhat-ods-applications
+  labels:
+    app.kubernetes.io/name: kueue
+    role: alert-rules
+spec:
+  groups:
+    - name: kueue-workload-alerts
+      rules:
+        # ── Pending workload backlog ──────────────────────────────
+        - alert: KueueHighPendingWorkloads
+          annotations:
+            summary: "ClusterQueue {{ $labels.cluster_queue }} has {{ $value }} pending workloads"
+            description: >-
+              More than 10 workloads have been pending for over 5 minutes
+              in ClusterQueue {{ $labels.cluster_queue }}.
+              Investigate quota limits or resource availability.
+            runbook_url: "https://kueue.sigs.k8s.io/docs/troubleshooting/"
+          expr: |
+            sum by (cluster_queue) (kueue_pending_workloads) > 10
+          for: 5m
+          labels:
+            severity: warning
+            component: kueue
+
+        # ── ClusterQueue down / terminated ────────────────────────
+        - alert: KueueClusterQueueDown
+          annotations:
+            summary: "ClusterQueue {{ $labels.cluster_queue }} is not active"
+            description: >-
+              ClusterQueue {{ $labels.cluster_queue }} has reported a
+              non-active status for more than 2 minutes.
+          expr: |
+            kueue_cluster_queue_status{status="active"} == 0
+          for: 2m
+          labels:
+            severity: critical
+            component: kueue
+
+        # ── High eviction rate ────────────────────────────────────
+        - alert: KueueHighEvictionRate
+          annotations:
+            summary: "High eviction rate in ClusterQueue {{ $labels.cluster_queue }}"
+            description: >-
+              ClusterQueue {{ $labels.cluster_queue }} is evicting more
+              than 5 workloads per hour, indicating preemption pressure.
+          expr: |
+            sum by (cluster_queue) (rate(kueue_evicted_workloads_total[1h])) * 3600 > 5
+          for: 10m
+          labels:
+            severity: warning
+            component: kueue
+
+        # ── Quota exhaustion ──────────────────────────────────────
+        - alert: KueueQuotaExhausted
+          annotations:
+            summary: "Quota near exhaustion for {{ $labels.cluster_queue }} — {{ $labels.resource }}"
+            description: >-
+              Resource usage in ClusterQueue {{ $labels.cluster_queue }}
+              for {{ $labels.resource }} (flavor: {{ $labels.flavor }})
+              has exceeded 95% of the nominal quota for over 10 minutes.
+          expr: |
+            (kueue_cluster_queue_resource_usage / kueue_cluster_queue_nominal_quota) > 0.95
+          for: 10m
+          labels:
+            severity: critical
+            component: kueue
+
+        # ── Admission latency degradation ─────────────────────────
+        - alert: KueueAdmissionLatencyHigh
+          annotations:
+            summary: "p95 admission latency is above 120s"
+            description: >-
+              The 95th-percentile admission wait time has been above
+              120 seconds for 10 minutes.
+          expr: |
+            histogram_quantile(0.95,
+              sum(rate(kueue_admission_wait_time_seconds_bucket[5m])) by (le)
+            ) > 120
+          for: 10m
+          labels:
+            severity: warning
+            component: kueue
+
+    - name: kueue-scrape-health
+      rules:
+        # ── Kueue target down ─────────────────────────────────────
+        - alert: KueueTargetDown
+          annotations:
+            summary: "Prometheus cannot scrape Kueue metrics"
+            description: >-
+              The Kueue controller-manager metrics endpoint has been
+              unreachable for more than 3 minutes.
+          expr: |
+            up{job=~".*kueue.*"} == 0
+          for: 3m
+          labels:
+            severity: critical
+            component: kueue
