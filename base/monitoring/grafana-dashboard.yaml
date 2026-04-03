@@ -1,0 +1,13 @@
+apiVersion: grafana.integreatly.org/v1beta1
+kind: GrafanaDashboard
+metadata:
+  name: kueue-openshift-ai
+  namespace: kueue-monitoring
+spec:
+  resyncPeriod: 5m
+  instanceSelector:
+    matchLabels:
+      dashboards: kueue-grafana
+  configMapRef:
+    name: kueue-dashboard-json
+    key: kueue-openshift-ai-dashboard.json
