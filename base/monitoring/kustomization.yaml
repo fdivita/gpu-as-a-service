@@ -9,4 +9,7 @@ kind: Kustomization
 resources:
  - enableMonitoring.yaml
  - serviceAccount.yaml
+ - grafana-datasource.yaml
  - serviceMonitor.yaml
+ - kueue-servicemonitor.yaml
+ - kueue-prometheus-rules.yaml
