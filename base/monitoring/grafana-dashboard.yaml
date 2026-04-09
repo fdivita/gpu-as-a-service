@@ -7,7 +7,7 @@ spec:
   instanceSelector:
     matchLabels:
       app.kubernetes.io/instance: grafana
-  json: |
+  json: |-
     {
       "__inputs": [
         {
