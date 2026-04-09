@@ -2,6 +2,7 @@ apiVersion: grafana.integreatly.org/v1beta1
 kind: GrafanaDashboard
 metadata:
   name: kueue-openshift-ai
+  namespace: grafana
 spec:
   resyncPeriod: 5m
   instanceSelector:
