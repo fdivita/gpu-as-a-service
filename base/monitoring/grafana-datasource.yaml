@@ -23,4 +23,4 @@ spec:
       httpHeaderValue1: "Bearer REPLACE_WITH_SA_TOKEN"
   instanceSelector:
     matchLabels:
-      dashboards: kueue-grafana
+      app.kubernetes.io/instance: grafana
