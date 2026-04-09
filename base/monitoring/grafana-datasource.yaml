@@ -5,7 +5,9 @@ metadata:
   namespace: grafana
 spec:
   datasource:
-    name: Prometheus (OpenShift)
+    access: proxy
+    database: prometheus 
+    name: Prometheus 
     type: prometheus
     access: proxy
     isDefault: true
