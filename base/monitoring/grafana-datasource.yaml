@@ -9,7 +9,7 @@ spec:
     type: prometheus
     access: proxy
     isDefault: true
-    url: "https://thanos-querier.openshift-monitoring.svc.cluster.local:9091"
+    url: "https://thanos-querier.openshift-monitoring.svc:9091"
     jsonData:
       httpHeaderName1: "Authorization"
       timeInterval: "5s"
