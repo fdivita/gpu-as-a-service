@@ -7,7 +7,7 @@ spec:
   resyncPeriod: 5m
   instanceSelector:
     matchLabels:
-      dashboards: kueue-grafana
+      dashboards: grafana
   json: |
     {
       "__inputs": [
