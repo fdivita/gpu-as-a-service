@@ -7,7 +7,6 @@ kind: Kustomization
 # -----------------------------------------------------------------
 
 resources:
- - enableMonitoring.yaml
  - serviceAccount.yaml
  - grafana-datasource.yaml
  - grafana-dashboard.yaml
