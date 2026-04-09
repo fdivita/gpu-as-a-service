@@ -11,5 +11,5 @@ resources:
  - serviceAccount.yaml
  - grafana-datasource.yaml
  - serviceMonitor.yaml
- - kueue-servicemonitor.yaml
+ - servicemonitor.yaml
  - kueue-prometheus-rules.yaml
