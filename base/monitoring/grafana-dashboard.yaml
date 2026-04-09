@@ -7,7 +7,7 @@ spec:
   resyncPeriod: 5m
   instanceSelector:
     matchLabels:
-      dashboards: grafana
+      app.kubernetes.io/instance: grafana
   json: |
     {
       "__inputs": [
