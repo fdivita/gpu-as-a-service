@@ -8,6 +8,9 @@ spec:
   instanceSelector:
     matchLabels:
       app.kubernetes.io/instance: grafana
+  datasources:
+    - inputName: "DS_PROMETHEUS"
+      datasourceName: "Prometheus"
   json: |-
     {
       "__inputs": [
