@@ -18,7 +18,7 @@ The entire configuration is declarative (Kustomize) and GitOps-ready (ArgoCD), m
 | Component | Version | Notes |
 |-----------|---------|-------|
 | **Red Hat OpenShift** | 4.20+ | Cluster with at least one NVIDIA GPU node |
-| **Red Hat OpenShift AI** | 3.3+ | Installed via OperatorHub |
+| **Red Hat OpenShift AI** | 3.3+ | Installed via OperatorHub | Kueue enabled in the Openshift AI istance (state: Unmanaged)
 | **Red Hat Build of Kueue** | Enabled in the `DataScienceCluster` CR | Provides `ClusterQueue`, `LocalQueue`, `Cohort`, `WorkloadPriorityClass` |
 | **Grafana Operator** | Community edition (v5) | Installed via OperatorHub in the `grafana` namespace |
 | **NVIDIA GPU Operator** | Compatible with cluster GPUs | Provides the `nvidia.com/gpu` resource and node labels |
