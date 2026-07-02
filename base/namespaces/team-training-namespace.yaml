@@ -2,7 +2,7 @@ apiVersion: v1
 kind: Namespace
 metadata:
   labels:
-    kubernetes.io-metadata.name: team-training
+    kubernetes.io/metadata.name: team-training
     opendatahub.io/dashboard: "true"
     kueue.openshift.io/managed: "true"
   name: team-training
