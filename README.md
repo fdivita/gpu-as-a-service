@@ -18,8 +18,18 @@ The entire configuration is declarative (Kustomize) and GitOps-ready (ArgoCD), m
 | Component | Version | Notes |
 |-----------|---------|-------|
 | **Red Hat OpenShift** | 4.20+ | Cluster with at least one NVIDIA GPU node |
-| **Red Hat OpenShift AI** | 3.3+ | Installed via OperatorHub | Kueue enabled in the Openshift AI istance (state: Unmanaged)
+| **Red Hat OpenShift AI** | 3.3+ | Installed via OperatorHub | Kueue enabled in the OpenShift AI instance (`managementState: Unmanaged`) |
 | **Red Hat Build of Kueue** | Enabled in the `DataScienceCluster` CR | Provides `ClusterQueue`, `LocalQueue`, `Cohort`, `WorkloadPriorityClass` |
+
+**Enable Kueue before deploying this repo** (wait for CRDs to appear):
+
+```bash
+oc patch datasciencecluster default-dsc --type merge \
+  -p '{"spec":{"components":{"kueue":{"managementState":"Unmanaged"}}}}'
+
+oc wait --for=condition=Established crd/clusterqueues.kueue.x-k8s.io --timeout=300s
+oc get pods -n openshift-kueue-operator
+```
 | **Grafana Operator** | Community edition (v5) | Installed via OperatorHub in the `grafana` namespace |
 | **NVIDIA GPU Operator** | Compatible with cluster GPUs | Provides the `nvidia.com/gpu` resource and node labels |
 
@@ -186,6 +196,17 @@ spec:
 oc apply -k base/
 ```
 
+### Post-deployment: Enable Kueue in the OpenShift AI dashboard
+
+If the dashboard shows **"Kueue is disabled in this cluster"**, enable it explicitly:
+
+```bash
+oc patch odhdashboardconfig odh-dashboard-config \
+  -n redhat-ods-applications \
+  --type merge \
+  -p '{"spec":{"dashboardConfig":{"disableKueue":false}}}'
+```
+
 ### Post-deployment: Configure the Grafana Datasource Token
 
 The Grafana datasource needs a ServiceAccount token to authenticate against the OpenShift Thanos Querier. After deployment, run:
@@ -196,4 +217,21 @@ TOKEN=$(oc get secret grafana-sa-token -n kueue-monitoring -o jsonpath='{.data.t
 oc patch grafanadatasource prometheus-thanos -n grafana \
   --type merge \
   -p "{\"spec\":{\"datasource\":{\"secureJsonData\":{\"httpHeaderValue1\":\"Bearer ${TOKEN}\"}}}}"
+```
+
+## Troubleshooting
+
+| Symptom | Cause | Fix |
+|---------|-------|-----|
+| `ClusterQueue CRD is not installed` | gpuaas synced before Kueue was enabled | Enable Kueue in `DataScienceCluster`, wait for CRDs, then re-sync the Argo CD app |
+| `Kueue is disabled in this cluster` | Dashboard Kueue feature not enabled | Run the `disableKueue: false` patch above |
+| `application "gpu-as-a-service" not found` | Argo CD app has a different name | List apps with `oc get application -n openshift-gitops` (e.g. `gpuaas`) |
+
+Verify deployment:
+
+```bash
+oc get application -n openshift-gitops
+oc get clusterqueue inference-cq training-cq
+oc get cohort gpu-cohort
+oc get localqueue -A
 ```

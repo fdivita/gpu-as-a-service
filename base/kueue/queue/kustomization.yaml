@@ -7,9 +7,9 @@ kind: Kustomization
 # -----------------------------------------------------------------
 
 resources:
+ - cohort.yaml
  - clusterqueue-inference.yaml
  - clusterqueue-training.yaml
  - localqueue-inference.yaml
  - localqueue-training.yaml
- - cohort.yaml
  
