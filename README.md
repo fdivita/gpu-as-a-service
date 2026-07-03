@@ -8,7 +8,6 @@ This repository provides a **GPU-as-a-Service** solution that uses **Red Hat Bui
 
 - **Guaranteed GPU quotas per team** with elastic borrowing when capacity is idle, ensuring no GPU sits unused while workloads wait.
 - **Priority-based preemption** so that high-priority inference workloads can reclaim GPUs from lower-priority training jobs when demand spikes.
-- **Hardware Profiles** integrated with the OpenShift AI dashboard, giving data scientists a self-service experience — they select a profile and the platform handles queue routing, priority, and GPU scheduling transparently.
 - **Grafana monitoring** with a purpose-built dashboard tracking workload lifecycle, admission latency, resource utilization, borrowing, and Prometheus scrape health.
 
 The entire configuration is declarative (Kustomize) and GitOps-ready (ArgoCD), making it reproducible and auditable.
@@ -58,12 +57,6 @@ oc get pods -n openshift-kueue-operator
        │   team-inference   │           │   team-training    │
        │   (LocalQueue)     │           │   (LocalQueue)     │
        │   ns: team-inference│          │   ns: team-training│
-       └────────┬──────────┘           └─────────┬─────────┘
-                │                                │
-       ┌────────┴──────────┐           ┌─────────┴─────────┐
-       │   highpriority     │           │   lowpriority      │
-       │ (HardwareProfile)  │           │ (HardwareProfile)  │
-       │   GPU: 1-4         │           │   GPU: 1-3         │
        └───────────────────┘           └────────────────────┘
 ```
 
@@ -97,14 +90,7 @@ oc get pods -n openshift-kueue-operator
 | `gpu-flavor` | NVIDIA GPU nodes | `nvidia.com/gpu.present: "true"` | `nvidia.com/gpu` (NoSchedule) |
 | `default-flavor` | CPU/Memory (any node) | None | None |
 
-## Hardware Profiles (OpenShift AI Dashboard)
-
-| Profile | Display Name | Queue | Priority Class | GPU Range |
-|---------|-------------|-------|----------------|-----------|
-| `highpriority` | highPriority | `team-inference` | `inference-priority` | 1-4 |
-| `lowpriority` | lowPriority | `team-training` | `training-priority` | 1-3 |
-
-Hardware profiles integrate with the OpenShift AI dashboard, allowing data scientists to select a profile when launching a workbench or serving runtime. The platform automatically routes the workload to the correct LocalQueue with the appropriate priority class.
+Workloads must reference the correct LocalQueue and priority class directly (for example via the `kueue.x-k8s.io/queue-name` label and `kueue.x-k8s.io/priority-class` label).
 
 ## Monitoring
 
@@ -154,10 +140,6 @@ base/
 │   │   ├── kustomization.yaml
 │   │   ├── inferencePriorityClass.yaml
 │   │   └── trainingPriorityClass.yaml
-│   └── hardware-profiles/
-│       ├── kustomization.yaml
-│       ├── highPriority-hardwareProfile.yaml
-│       └── lowPriority-hardwareProfile.yaml
 └── monitoring/
     ├── kustomization.yaml
     ├── grafana-dashboard.yaml

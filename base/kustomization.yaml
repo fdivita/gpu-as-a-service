@@ -9,7 +9,6 @@ kind: Kustomization
 resources:
  - namespaces
  - resourceflavor
- - kueue/hardware-profiles
  - kueue/queue
  - kueue/priorityclass
  - monitoring
